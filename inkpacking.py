@@ -1,7 +1,9 @@
-#! /usr/bin/env python
-'''
-Copyleft ( ) 2009 Celso Junior celsojr2008 at gmail dot com>, 
+#!/usr/bin/env python3
+"""
+Copyleft ( ) 2009 Celso Junior celsojr2008 at gmail dot com>,
              2015 Maren Hachmann <marenhachmann@yahoo.com> (updated for Inkscape 0.91)
+             2026 updated for Inkscape 1.x / Python 3
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
@@ -15,189 +17,88 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-'''
+"""
 
-__version__ = "0.11"
+__version__ = "0.12"
 
-import inkex, simplestyle
+import inkex
 from math import *
-from simplepath import formatPath
-
-class inkpacking(inkex.Effect):
-
-    def __init__(self):
-        inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--width",
-                        action="store", type="float",
-                        dest="width", default=10.0,
-                        help="")
-        self.OptionParser.add_option("--height",
-                        action="store", type="float",
-                        dest="height", default=15.0,
-                        help="")
-        self.OptionParser.add_option("--depth",
-                        action="store", type="float",
-                        dest="depth", default=3.0,
-                        help="")
-        self.OptionParser.add_option("--unit",
-                        action="store", type="string",
-                        dest="unit", default="mm",
-                        help="")
-        self.OptionParser.add_option("--topscheme",
-                        action="store", type="string",
-                        dest="topscheme", default="rwlf",
-                        help="")
-        self.OptionParser.add_option("--botscheme",
-                        action="store", type="string",
-                        dest="botscheme", default="rwlf",
-                        help="")
-        self.OptionParser.add_option("--paper-thickness",
-                        action="store", type="float",
-                        dest="thickness", default=0.5,
-                        help="")
-        self.OptionParser.add_option("-t", "--tab-proportion",
-                        action="store", type="float",
-                        dest="tabProportion", default=14,
-                        help="Inner tab propotion for upper tab")
-        self.OptionParser.add_option("-r", "--lockroundradius",
-                        action="store", type="float",
-                        dest="lockroundradius", default=18,
-                        help="Lock Radius")
-        self.OptionParser.add_option("-c", "--clueflapsize",
-                        action="store", type="float",
-                        dest="clueflapsize", default=13,
-                        help="Clue Flap Size")
-        self.OptionParser.add_option("-a", "--clueflapangle",
-                        action="store", type="float",
-                        dest="clueflapangle", default=12,
-                        help="Clue Flap Angle")
-        self.OptionParser.add_option("--clueflapside",
-                        action="store", type="inkbool", 
-                        dest="clueflapside", default=False,
-                        help="")    
-        self.OptionParser.add_option("--pages",
-                        action="store", type="string", 
-                        dest="page", default="page1",
-                        help="") 
-        self.OptionParser.add_option("--dustpages",
-                        action="store", type="string", 
-                        dest="dustpage", default="page1",
-                        help="") 
-        self.OptionParser.add_option("--about",
-                        action="store", type="string", 
-                        dest="about", default="",
-                        help="") 
-        self.OptionParser.add_option("--tfal",
-                        action="store", type="inkbool", 
-                        dest="tfal", default=False,
-                        help="")    
-        self.OptionParser.add_option("--bfal",
-                        action="store", type="inkbool", 
-                        dest="bfal", default=False,
-                        help="")    
-        self.OptionParser.add_option("--hotmeltprop",
-                        action="store", type="float", 
-                        dest="hotmeltprop", default=0.6,
-                        help="")    
-        self.OptionParser.add_option("--createshapes",
-                        action="store", type="inkbool", 
-                        dest="createshapes", default=False,
-                        help="")    
-        self.OptionParser.add_option("--createglueshapes",
-                        action="store", type="inkbool", 
-                        dest="createglueshapes", default=False,
-                        help="")    
-        self.OptionParser.add_option("--fingergrepa",
-                        action="store", type="inkbool", 
-                        dest="fingergrepa", default=False,
-                        help="")    
-        self.OptionParser.add_option("--fingergrepb",
-                        action="store", type="inkbool", 
-                        dest="fingergrepb", default=False,
-                        help="")    
-        self.OptionParser.add_option("--fingergrepr",
-                        action="store", type="float", 
-                        dest="fingergrepr", default=5,
-                        help="")    
-
-        self.OptionParser.add_option("--usetop",
-                        action="store", type="inkbool", 
-                        dest="usetop", default=False,
-                        help="")    
-
-        self.OptionParser.add_option("--glueflapinoff",
-                        action="store", type="float", 
-                        dest="glueflapinoff", default=0,
-                        help="")    
-        self.OptionParser.add_option("--glueflapin45",
-                        action="store", type="float", 
-                        dest="glueflapin45", default=2,
-                        help="")    
-        self.OptionParser.add_option("--glueflapinang",
-                        action="store", type="float", 
-                        dest="glueflapinang", default=7,
-                        help="")    
-        self.OptionParser.add_option("--glueflapouoff",
-                        action="store", type="float", 
-                        dest="glueflapouoff", default=0,
-                        help="")    
-        self.OptionParser.add_option("--glueflapou45",
-                        action="store", type="float", 
-                        dest="glueflapou45", default=3,
-                        help="")    
-        self.OptionParser.add_option("--glueflapouang",
-                        action="store", type="float", 
-                        dest="glueflapouang", default=12,
-                        help="")    
-
-        self.OptionParser.add_option("--bglueflapinoff",
-                        action="store", type="float", 
-                        dest="bglueflapinoff", default=0,
-                        help="")    
-        self.OptionParser.add_option("--bglueflapin45",
-                        action="store", type="float", 
-                        dest="bglueflapin45", default=2,
-                        help="")    
-        self.OptionParser.add_option("--bglueflapinang",
-                        action="store", type="float", 
-                        dest="bglueflapinang", default=7,
-                        help="")    
-        self.OptionParser.add_option("--bglueflapouoff",
-                        action="store", type="float", 
-                        dest="bglueflapouoff", default=0,
-                        help="")    
-        self.OptionParser.add_option("--bglueflapou45",
-                        action="store", type="float", 
-                        dest="bglueflapou45", default=3,
-                        help="")    
-        self.OptionParser.add_option("--bglueflapouang",
-                        action="store", type="float", 
-                        dest="bglueflapouang", default=12,
-                        help="")    
+from lxml import etree
 
 
-        self.OptionParser.add_option("--roto",
-                        action="store", type="float", 
-                        dest="roto", default=0,
-                        help="")    
+def format_path(path):
+    """Re-implementation of the old simplepath.formatPath() helper:
+    turns a list of [command, [params...]] pairs into an SVG path 'd' string."""
+    parts = []
+    for cmd, params in path:
+        parts.append(cmd)
+        for p in params:
+            if isinstance(p, float):
+                p = round(p, 6)
+                if p == int(p):
+                    p = int(p)
+            parts.append(str(p))
+    return " ".join(parts)
+
+
+class InkPacking(inkex.EffectExtension):
+
+    def add_arguments(self, pars):
+        pars.add_argument("--width", type=float, dest="width", default=10.0)
+        pars.add_argument("--height", type=float, dest="height", default=15.0)
+        pars.add_argument("--depth", type=float, dest="depth", default=3.0)
+        pars.add_argument("--unit", type=str, dest="unit", default="mm")
+        pars.add_argument("--topscheme", type=str, dest="topscheme", default="rwlf")
+        pars.add_argument("--botscheme", type=str, dest="botscheme", default="rwlf")
+        pars.add_argument("--paper-thickness", type=float, dest="thickness", default=0.5)
+        pars.add_argument("-t", "--tab-proportion", type=float, dest="tabProportion", default=14, help="Inner tab propotion for upper tab")
+        pars.add_argument("-r", "--lockroundradius", type=float, dest="lockroundradius", default=18, help="Lock Radius")
+        pars.add_argument("-c", "--clueflapsize", type=float, dest="clueflapsize", default=13, help="Clue Flap Size")
+        pars.add_argument("-a", "--clueflapangle", type=float, dest="clueflapangle", default=12, help="Clue Flap Angle")
+        pars.add_argument("--clueflapside", type=inkex.Boolean, dest="clueflapside", default=False)
+        pars.add_argument("--pages", type=str, dest="page", default="page1")
+        pars.add_argument("--dustpages", type=str, dest="dustpage", default="page1")
+        pars.add_argument("--about", type=str, dest="about", default="")
+        pars.add_argument("--tfal", type=inkex.Boolean, dest="tfal", default=False)
+        pars.add_argument("--bfal", type=inkex.Boolean, dest="bfal", default=False)
+        pars.add_argument("--hotmeltprop", type=float, dest="hotmeltprop", default=0.6)
+        pars.add_argument("--createshapes", type=inkex.Boolean, dest="createshapes", default=False)
+        pars.add_argument("--createglueshapes", type=inkex.Boolean, dest="createglueshapes", default=False)
+        pars.add_argument("--fingergrepa", type=inkex.Boolean, dest="fingergrepa", default=False)
+        pars.add_argument("--fingergrepb", type=inkex.Boolean, dest="fingergrepb", default=False)
+        pars.add_argument("--fingergrepr", type=float, dest="fingergrepr", default=5)
+        pars.add_argument("--usetop", type=inkex.Boolean, dest="usetop", default=False)
+        pars.add_argument("--glueflapinoff", type=float, dest="glueflapinoff", default=0)
+        pars.add_argument("--glueflapin45", type=float, dest="glueflapin45", default=2)
+        pars.add_argument("--glueflapinang", type=float, dest="glueflapinang", default=7)
+        pars.add_argument("--glueflapouoff", type=float, dest="glueflapouoff", default=0)
+        pars.add_argument("--glueflapou45", type=float, dest="glueflapou45", default=3)
+        pars.add_argument("--glueflapouang", type=float, dest="glueflapouang", default=12)
+        pars.add_argument("--bglueflapinoff", type=float, dest="bglueflapinoff", default=0)
+        pars.add_argument("--bglueflapin45", type=float, dest="bglueflapin45", default=2)
+        pars.add_argument("--bglueflapinang", type=float, dest="bglueflapinang", default=7)
+        pars.add_argument("--bglueflapouoff", type=float, dest="bglueflapouoff", default=0)
+        pars.add_argument("--bglueflapou45", type=float, dest="bglueflapou45", default=3)
+        pars.add_argument("--bglueflapouang", type=float, dest="bglueflapouang", default=12)
+        pars.add_argument("--roto", type=float, dest="roto", default=0)
 
     def effect(self):
 
-        docW = self.getUnittouu(self.document.getroot().get('width'))
-        docH = self.getUnittouu(self.document.getroot().get('height'))
+        docW = self.svg.unittouu(self.svg.get('width'))
+        docH = self.svg.unittouu(self.svg.get('height'))
 
-        roto = self.getUnittouu( str(self.options.roto)  + self.options.unit )
+        roto = self.svg.unittouu( str(self.options.roto)  + self.options.unit )
 
-        boxW = self.getUnittouu( str(self.options.width)  + self.options.unit )
-        boxH = self.getUnittouu( str(self.options.height) + self.options.unit )
-        boxD = self.getUnittouu( str(self.options.depth)  + self.options.unit )
-        boxL = self.getUnittouu( str(self.options.tabProportion)  + self.options.unit )
-        thck = self.getUnittouu( str(self.options.thickness)  + self.options.unit )
-        fingergrepr = self.getUnittouu( str(self.options.fingergrepr)  + self.options.unit ) 
+        boxW = self.svg.unittouu( str(self.options.width)  + self.options.unit )
+        boxH = self.svg.unittouu( str(self.options.height) + self.options.unit )
+        boxD = self.svg.unittouu( str(self.options.depth)  + self.options.unit )
+        boxL = self.svg.unittouu( str(self.options.tabProportion)  + self.options.unit )
+        thck = self.svg.unittouu( str(self.options.thickness)  + self.options.unit )
+        fingergrepr = self.svg.unittouu( str(self.options.fingergrepr)  + self.options.unit ) 
 
 
 
-        gflapsize = self.getUnittouu( str(self.options.clueflapsize)  + self.options.unit )
+        gflapsize = self.svg.unittouu( str(self.options.clueflapsize)  + self.options.unit )
         gflapangle = self.options.clueflapangle
 
         gfmirror = self.options.clueflapside
@@ -207,32 +108,32 @@ class inkpacking(inkex.Effect):
         usetop = self.options.usetop
 
 
-        glueflapinoff = self.getUnittouu( str(self.options.glueflapinoff)  + self.options.unit )
-        glueflapin45 = self.getUnittouu( str(self.options.glueflapin45)  + self.options.unit )
+        glueflapinoff = self.svg.unittouu( str(self.options.glueflapinoff)  + self.options.unit )
+        glueflapin45 = self.svg.unittouu( str(self.options.glueflapin45)  + self.options.unit )
 
-        lockrr = self.getUnittouu( str(self.options.lockroundradius)  + self.options.unit )
+        lockrr = self.svg.unittouu( str(self.options.lockroundradius)  + self.options.unit )
 
         glueflapinang = self.options.glueflapinang
 
         glueflapindesl = (( (boxD + boxL) / 2  - glueflapinoff - glueflapin45) /  sin(radians(90 - glueflapinang)) * sin(radians(glueflapinang)))
 
-        glueflapouoff = self.getUnittouu( str(self.options.glueflapouoff)  + self.options.unit )
-        glueflapou45 = self.getUnittouu( str(self.options.glueflapou45)  + self.options.unit )
+        glueflapouoff = self.svg.unittouu( str(self.options.glueflapouoff)  + self.options.unit )
+        glueflapou45 = self.svg.unittouu( str(self.options.glueflapou45)  + self.options.unit )
         glueflapouang = self.options.glueflapouang
 
         glueflapoudesl = (( (boxD + boxL) / 2 - glueflapouoff - glueflapou45) /  sin(radians(90 - glueflapouang)) * sin(radians(glueflapouang)))
 
 
 
-        bglueflapinoff = self.getUnittouu( str(self.options.bglueflapinoff)  + self.options.unit )
-        bglueflapin45 = self.getUnittouu( str(self.options.bglueflapin45)  + self.options.unit )
+        bglueflapinoff = self.svg.unittouu( str(self.options.bglueflapinoff)  + self.options.unit )
+        bglueflapin45 = self.svg.unittouu( str(self.options.bglueflapin45)  + self.options.unit )
 
         bglueflapinang = self.options.bglueflapinang
 
         bglueflapindesl = (( (boxD + boxL) / 2  - bglueflapinoff - bglueflapin45) /  sin(radians(90 - bglueflapinang)) * sin(radians(bglueflapinang)))
 
-        bglueflapouoff = self.getUnittouu( str(self.options.bglueflapouoff)  + self.options.unit )
-        bglueflapou45 = self.getUnittouu( str(self.options.bglueflapou45)  + self.options.unit )
+        bglueflapouoff = self.svg.unittouu( str(self.options.bglueflapouoff)  + self.options.unit )
+        bglueflapou45 = self.svg.unittouu( str(self.options.bglueflapou45)  + self.options.unit )
         bglueflapouang = self.options.bglueflapouang
 
         bglueflapoudesl = (( (boxD + boxL) / 2 - bglueflapouoff - bglueflapou45) /  sin(radians(90 - bglueflapouang)) * sin(radians(bglueflapouang)))
@@ -249,11 +150,11 @@ class inkpacking(inkex.Effect):
         angy = (3.141615 / 2) - angx 
         lockroff = lockrr - (lockrr * sin(angy))
 
-        box_id = self.uniqueId('box')
+        box_id = self.svg.get_unique_id('box')
 
-        self.box = g = inkex.etree.SubElement(self.current_layer, 'g', {'id':box_id})
+        self.box = g = etree.SubElement(self.svg.get_current_layer(), 'g', {'id': box_id})
 
-        line_style = simplestyle.formatStyle({ 'stroke': '#000000', 'fill': 'none' })
+        line_style = str(inkex.Style({'stroke': '#000000', 'fill': 'none'}))
 
         gflapoffy = (gflapsize / sin( (gflapangle /  360) * 6.28  )) * sin( ((90 - gflapangle) / 360 ) * 6.28)
 
@@ -280,8 +181,8 @@ class inkpacking(inkex.Effect):
         
 
 
-        line_atts = { 'style':line_style, 'id':box_id+'-sideglueflap', 'd':formatPath(line_path) }
-        inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+        line_atts = { 'style':line_style, 'id':box_id+'-sideglueflap', 'd':format_path(line_path) }
+        etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
    
         
 
@@ -300,8 +201,8 @@ class inkpacking(inkex.Effect):
                       [ 'M', [ 0, 0 ] ],
                       [ 'Z', [] ]
                     ]
-        line_atts = { 'style':line_style, 'id':box_id+'-body', 'd':formatPath(line_path) }
-        inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+        line_atts = { 'style':line_style, 'id':box_id+'-body', 'd':format_path(line_path) }
+        etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
         # No Top Option
         if tpsc == "notp":
@@ -363,8 +264,8 @@ class inkpacking(inkex.Effect):
                             ]
             
 
-            line_atts = { 'style':line_style, 'id':box_id+'-topdraw', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+            line_atts = { 'style':line_style, 'id':box_id+'-topdraw', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
         # No Bottom Option
         if btsc == "nobt":
@@ -426,8 +327,8 @@ class inkpacking(inkex.Effect):
                             ]
             
 
-            line_atts = { 'style':line_style, 'id':box_id+'-botdraw', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+            line_atts = { 'style':line_style, 'id':box_id+'-botdraw', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
         # Flat Bottom with Lock Flaps
         if btsc == "fwlf":
@@ -457,8 +358,8 @@ class inkpacking(inkex.Effect):
                         [ 'l', [boxW,0] ],
                         [ 'Z', [] ]
                        ]
-            line_atts = { 'style':line_style, 'id':box_id+'-bothead', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+            line_atts = { 'style':line_style, 'id':box_id+'-bothead', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
             if fingergrepa:
                 line_path = [
@@ -469,8 +370,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
             if not fingergrepa:
                 line_path = [
                     ["M", [inicut, boxH]],
@@ -478,8 +379,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
             
         
         # Flat Top with Lock Flaps
@@ -510,8 +411,8 @@ class inkpacking(inkex.Effect):
                         [ 'l', [boxW,0] ],
                         [ 'Z', [] ]
                        ]
-            line_atts = { 'style':line_style, 'id':box_id+'-tophead', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+            line_atts = { 'style':line_style, 'id':box_id+'-tophead', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
             if fingergrepa:
                 line_path = [
@@ -522,8 +423,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
             if not fingergrepa:
                 line_path = [
                     ["M", [inicut,0]],
@@ -531,8 +432,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
         # Rounded Bottom with Lock Flaps
         if btsc == "rwlf":
@@ -562,8 +463,8 @@ class inkpacking(inkex.Effect):
                         [ 'l', [boxW,0] ],
                         [ 'Z', [] ]
                        ]
-            line_atts = { 'style':line_style, 'id':box_id+'-bothead', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+            line_atts = { 'style':line_style, 'id':box_id+'-bothead', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
             if fingergrepa:
                 line_path = [
@@ -574,8 +475,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
             if not fingergrepa:
                 line_path = [
                     ["M", [inicut,boxH]],
@@ -583,8 +484,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-botcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
         # Rounded Top with Lock Flaps
         if tpsc == "rwlf":
@@ -614,8 +515,8 @@ class inkpacking(inkex.Effect):
                         [ 'l', [boxW,0] ],
                         [ 'Z', [] ]
                        ]
-            line_atts = { 'style':line_style, 'id':box_id+'-tophead', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+            line_atts = { 'style':line_style, 'id':box_id+'-tophead', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
             if fingergrepa:
                 line_path = [
@@ -626,8 +527,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
             if not fingergrepa:
                 line_path = [
                     ["M", [inicut,0]],
@@ -635,8 +536,8 @@ class inkpacking(inkex.Effect):
                     ["M", [0,0] ],
                     ["Z", [] ]
                 ]
-                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-topcut', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
             
         # HotMelt Top
         if tpsc == "fwnf":
@@ -661,8 +562,8 @@ class inkpacking(inkex.Effect):
                               [ 'L', [ boxW + boxD + boxW ,  0 - thck ] ],
                               [ 'Z', [] ]
                             ]
-                line_atts = { 'style':line_style, 'id':box_id+'-topdraw', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-topdraw', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
             if not tfal:
                 line_path = [
@@ -685,8 +586,8 @@ class inkpacking(inkex.Effect):
                               [ 'L', [ boxW + boxD + boxW ,  0 - thck ] ],
                               [ 'Z', [] ]
                             ]
-                line_atts = { 'style':line_style, 'id':box_id+'-topdraw', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-topdraw', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
         # HotMelt Bottom
         if btsc == "fwnf":
@@ -711,8 +612,8 @@ class inkpacking(inkex.Effect):
                               [ 'L', [ boxW + boxD + boxW ,  boxH + thck ] ],
                               [ 'Z', [] ]
                             ]
-                line_atts = { 'style':line_style, 'id':box_id+'-botdraw', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-botdraw', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
             if not bfal:
                 line_path = [
@@ -735,13 +636,13 @@ class inkpacking(inkex.Effect):
                               [ 'L', [ boxW + boxD + boxW ,  boxH + thck ] ],
                               [ 'Z', [] ]
                             ]
-                line_atts = { 'style':line_style, 'id':box_id+'-botdraw', 'd':formatPath(line_path) }
-                inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+                line_atts = { 'style':line_style, 'id':box_id+'-botdraw', 'd':format_path(line_path) }
+                etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
         thck2 = thck / 2
 
         # Top Glue Flaps
-        if tpsc <> "notp":
+        if tpsc != "notp":
             desclock = thck
             if tpsc == "fwnf":
                 desclock = 0
@@ -806,19 +707,19 @@ class inkpacking(inkex.Effect):
                              ]
 
 
-            line_atts = { 'style':line_style, 'id':box_id+'-topglueflap', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
+            line_atts = { 'style':line_style, 'id':box_id+'-topglueflap', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
                 
         # Bottom Glue Flaps
-	if not usetop:
-		glueflapinoff = bglueflapinoff
-		glueflapin45 = bglueflapin45
-		glueflapindesl = bglueflapindesl
-		glueflapouoff = bglueflapouoff
-		glueflapou45 = bglueflapou45
-		glueflapoudesl = bglueflapoudesl
+        if not usetop:
+            glueflapinoff = bglueflapinoff
+            glueflapin45 = bglueflapin45
+            glueflapindesl = bglueflapindesl
+            glueflapouoff = bglueflapouoff
+            glueflapou45 = bglueflapou45
+            glueflapoudesl = bglueflapoudesl
 
-        if btsc <> "nobt":
+        if btsc != "nobt":
             desclock = thck
             if btsc == "fwnf":
                 desclock = 0
@@ -883,16 +784,9 @@ class inkpacking(inkex.Effect):
                              ]
 
 
-            line_atts = { 'style':line_style, 'id':box_id+'-botglueflap', 'd':formatPath(line_path) }
-            inkex.etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
-            
-    def getUnittouu(self, param):
-        try:
-            return inkex.unittouu(param)
-        except AttributeError:
-            return self.unittouu(param)
+            line_atts = { 'style':line_style, 'id':box_id+'-botglueflap', 'd':format_path(line_path) }
+            etree.SubElement(g, inkex.addNS('path','svg'), line_atts )
 
-      
+
 if __name__ == '__main__':
-    e = inkpacking()
-    e.affect()
+    InkPacking().run()

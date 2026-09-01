@@ -1,15 +1,19 @@
 # inkpacking
 Inkscape extension to create foldable boxes, with finger slots and different flaps, takes paper thickness into account
 
-The extension was published by inkscapeforum.com member celso.junior in 2011 (see [this forum post](http://www.inkscapeforum.com/viewtopic.php?f=34&t=10880) for more details and a description by the original author). It has been updated to be compatible with Inkscape 0.91.
+The extension was published by inkscapeforum.com member celso.junior in 2011 (see [this forum post](http://www.inkscapeforum.com/viewtopic.php?f=34&t=10880) for more details and a description by the original author). It was later updated to be compatible with Inkscape 0.91, and in 2026 was ported to the Python 3 / Inkscape 1.x extension API (the old `inkex.Effect` / `optparse` / `simplepath` API was removed in Inkscape 1.0).
 
 This repository is intended to facilitate further development of the extension and to make it readily accessible. If you would like to contribute or take over maintenance, please contact github user Moini via this repository's [issue section](https://github.com/Moini/inkpacking/issues).
 
 It is licenced as GPL version 2 or later.
 
+## Requirements:
+
+Inkscape 1.0 or later (uses the current Python 3 extension API). It will not work in Inkscape 0.92 or earlier.
+
 ## Installation:
 
-Copy the files inkpacking.py and inkpacking.inx into the directory indicated in Edit -> Preferences -> System: User extensions
+Copy the files inkpacking.py and inkpacking.inx into the directory indicated in Edit -> Preferences -> System: User extensions, then restart Inkscape.
 
 ## Usage:
 
