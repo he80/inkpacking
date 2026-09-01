@@ -32,6 +32,26 @@ Verified (not just "ran without crashing"):
 `prototype_body.FCStd` is the saved result -- open it directly in FreeCAD
 to look at it.
 
+## Status: milestone 2 done
+
+`prototype_body_parametric.py` takes the same 4-panel body and drives
+*every* dimension from a `Parameters` Spreadsheet object through FreeCAD's
+expression engine (`Parameters.Width` etc.) instead of baked-in Python
+floats -- the pattern the eventual multi-style app builds on: one shared
+parameter schema, expressions everywhere, nothing hand-typed into geometry.
+
+Verified live, not just "expressions didn't error": built the model at
+40x30x80mm (matches milestone 1's numbers), then edited the spreadsheet
+cells to a completely different size (60x25x100mm) and recomputed with no
+other code changes -- the folded solid's envelope and volume both track
+the new dimensions exactly. Output:
+
+```
+[initial (40x30x80)] envelope OK: True, volume OK: True
+[after spreadsheet edit (60x25x100)] envelope OK: True, volume OK: True
+MILESTONE 2 RESULT: PASS
+```
+
 ## Running it
 
 Requires FreeCAD 1.1+ with the SheetMetal workbench addon installed
@@ -64,19 +84,39 @@ this script.)
   those can be farther away than the genuinely new one once panel lengths
   differ).
 
+## Where this is going: a desktop FreeCAD workbench
+
+The end goal is a real installable FreeCAD workbench -- a task-panel
+dialog inside FreeCAD itself (style thumbnail gallery + dimension fields),
+driving this same Spreadsheet -> parametric Sketch -> fold -> unfold/DXF ->
+TechDraw pipeline, comparable to what easypackmaker.com/pacdora.com do as
+web apps, but as an actual local CAD tool with no server involved.
+
+Scaling from "one style, hand-written" (this prototype) to "150+ FEFCO
+styles" means never hand-drawing a Sketch again: each style becomes a data
+record (which panels it has, from the same shape primitives as the
+Inkscape extension's `BoxBuilder` -- MainPanel, LockFlap, DustFlap,
+TuckLid, AutoLockFlap -- and how they connect), and a generator reads that
+record plus the `Parameters` sheet to emit the Sketch geometry and
+expression-bound constraints. Adding a style becomes a data entry, not new
+geometry code.
+
 ## Next milestones (not started)
 
 1. Extract the panel/fold-line data out of the Inkscape extension's
    `BoxBuilder` (`../inkpacking-master/inkpacking.py`) into a plain-Python
    module with no `inkex` dependency, so this script and the Inkscape
    extension share one source of truth instead of hand-copied dimensions.
-2. Add the flaps/tabs (lock tab, dust flaps, tuck lid, etc.) on top of the
-   4-panel body proven here.
-3. Use SheetMetal WB's own Unfold command on the resulting solid to
+2. Design the style-registry schema (panels + fold-graph per FEFCO code)
+   and generalize the sketch generator to read it, instead of the
+   hand-written 4-panel loop here.
+3. Add the flaps/tabs (lock tab, dust flaps, tuck lid, etc.) on top of the
+   body proven here, parametric the same way.
+4. Use SheetMetal WB's own Unfold command on the resulting solid to
    regenerate the flat pattern -- both as a correctness cross-check
    against the Inkscape extension's 2D output, and to get DXF/SVG export
    (with cut vs. bend lines already separated) for free.
-4. A TechDraw page: dimensioned view, title block, labeling/print
+5. A TechDraw page: dimensioned view, title block, labeling/print
    instructions.
-5. Only once 1-4 are solid: wrap this as an installable FreeCAD workbench
-   (toolbar, task panel, FEFCO code picker) instead of a script.
+6. Only once 1-5 are solid: wrap this as an installable FreeCAD workbench
+   (toolbar, task panel with the style gallery + dimension fields).
