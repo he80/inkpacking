@@ -3,6 +3,20 @@
   <name>InkPACKING</name>
   <id>org.inkscape.inkpacking</id>
   <param name="pages" type="notebook">
+    <page name="page0" gui-text="FEFCO Style">
+      <param name="fefcostyle" type="optiongroup" appearance="minimal" gui-text="Preset">
+        <option value="custom">Custom (use Top/Bottom Design page)</option>
+        <option value="fefco0215">FEFCO 0215 -- self-locking base, open top</option>
+        <option value="fefco0216">FEFCO 0216 -- self-locking base and lid</option>
+        <option value="fefco0414">FEFCO 0414 -- open tray, friction-tuck bottom (beta)</option>
+        <option value="fefco0427">FEFCO 0427 -- tuck-tongue lid (beta)</option>
+      </param>
+      <param name="fefcostyle-note" type="description">Picking a style here overrides the Top/Bottom Design page's Top Scheme, Bottom Scheme and flap-side settings; everything else (Width/Depth/Height, dust flaps, side flap) still applies. Choose "Custom" to go back to setting Top/Bottom Design yourself.
+
+0215 and 0216 use this extension's own lock-flap mechanism, which matches those two FEFCO styles closely.
+
+0414 and 0427 (marked "beta") are this generator's own topological interpretation of those two FEFCO styles, built from the published technical drawing's panel layout -- that drawing gives proportions as bare H/W/L/half-W labels with no angles or offsets, so there is no exact spec to trace. Fold a paper test copy before cutting real material, same as for any new die design.</param>
+    </page>
     <page name="page1" gui-text="Body Settings">
       <param name="width"  type="float" min="0.1" max="1000.0" gui-text="Width (A)">40</param>
       <param name="depth"  type="float" min="0.1" max="1000.0" gui-text="Depth (B)">30</param>
@@ -15,6 +29,7 @@
          <option value="rwlf">Rounded With Locker Flap</option>
          <option value="fwlf">Flat With Locker Flap</option>
          <option value="fwnf">HotMelt</option>
+         <option value="tuck">Tuck-Tongue Lid (FEFCO 0427-style, beta)</option>
        </param>
        <param name="tfal" type="boolean" gui-text="Top Flap at left">true</param>
        <param gui-text="Bottom Scheme" name="botscheme" type="optiongroup" appearance="minimal">
@@ -22,8 +37,8 @@
          <option value="rwlf">Rounded With Locker Flap</option>
          <option value="fwlf">Flat With Locker Flap</option>
          <option value="fwnf">HotMelt</option>
-         <!--<option value="saut">Semi Automatic *todo</option>
-         <option value="auto">Automatic *todo</option>-->
+         <option value="auto">Friction-Tuck (FEFCO 0414-style, beta)</option>
+         <!--<option value="saut">Semi Automatic *todo</option>-->
        </param>
        <param name="bfal" type="boolean" gui-text="Bottom Flap at left">true</param>
       <param name="hotmeltprop" type="float" min="0.5" max="1" gui-text="HotMelt Proportion">0.6</param>
@@ -70,10 +85,10 @@ fulfill your needs in having a complete, suitable
 and technically efficient open source Packaging Solution,
 which brings to Inkscape users unique advantages in Packaging Design.
 
-Version : 0.12 (updated for Inkscape 1.x / Python 3)
+Version : 0.13 (updated for Inkscape 1.x / Python 3; FEFCO style presets added)
 
-TODO: Mailer Lock; Tuck and Tongle; Gusset Tuck; Arthur Lock
-Dust Flaps; Edge Lock; Houghland Snap Lock Bottom
+TODO: Gusset Tuck; Arthur Lock
+Edge Lock; Houghland Snap Lock Bottom
 (semi automatic); Quad Lock Bottom; Himes Lock (Automatic Bottom); Security Zipper
 
 Brazil - 2009</param>

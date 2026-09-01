@@ -23,6 +23,15 @@ Copy the files inkpacking.py and inkpacking.inx into the directory indicated in 
 
 The generated lines come in two styles, so the output can be sent straight to a laser cutter / plotter workflow that tells them apart: solid black lines are cuts, dashed blue lines are folds (creases). Both are also tagged with a `class` attribute (`inkpacking-cut` / `inkpacking-fold`) for tools that filter by class rather than by color.
 
+## FEFCO style presets
+
+The first page of the dialog, "FEFCO Style", lets you pick a style by [FEFCO code](https://www.fefco.org/) instead of setting Top Scheme / Bottom Scheme / flap side yourself:
+
+* **0215** (self-locking base, open top) and **0216** (self-locking base and lid) use this extension's own lock-flap mechanism, which matches those two FEFCO styles closely.
+* **0414** (open tray, friction-tuck bottom) and **0427** (tuck-tongue lid) are marked "beta": the official FEFCO catalogue gives their panel proportions as bare `H`/`W`/`L`/`½W` labels on a technical drawing, with no angles or offsets, so there's no exact spec to trace by formula. These two are this generator's own topological interpretation of that drawing's panel layout (same fold/hinge structure, self-chosen proportions) rather than a reproduction of the exact die. Fold a paper test copy before cutting real material, same as you would for any new die design.
+
+Picking a preset overrides Top Scheme, Bottom Scheme, "Top/Bottom Flap at left" on the Top and Bottom Design page; everything else (dimensions, dust flaps, side flap) still applies from the other pages. Choose "Custom" to go back to setting Top/Bottom Design yourself -- which also still has its own manual "Tuck-Tongue Lid" / "Friction-Tuck" options if you want to mix them with schemes other than the exact FEFCO presets.
+
 ## Development
 
 `inkpacking.py` draws each panel/flap through a small set of shared helper methods on `BoxBuilder` (top and bottom ends are the same code mirrored by a sign, rather than duplicated), instead of one function per end/scheme combination.

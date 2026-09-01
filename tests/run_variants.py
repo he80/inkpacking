@@ -66,6 +66,14 @@ VARIANTS = [
     variant("independent_bottom_flaps", usetop="false",
             bglueflapinoff=1, bglueflapin45=4, bglueflapinang=15,
             bglueflapouoff=1, bglueflapou45=1, bglueflapouang=20),
+    variant("tuck_lid", topscheme="tuck", botscheme="rwlf"),
+    variant("tuck_lid_altflap", topscheme="tuck", botscheme="rwlf", tfal="false"),
+    variant("autolock_bottom", topscheme="notp", botscheme="auto"),
+    variant("autolock_bottom_altflap", topscheme="notp", botscheme="auto", bfal="false"),
+    variant("fefco_0215", fefcostyle="fefco0215"),
+    variant("fefco_0216", fefcostyle="fefco0216"),
+    variant("fefco_0414", fefcostyle="fefco0414"),
+    variant("fefco_0427", fefcostyle="fefco0427"),
 ]
 
 

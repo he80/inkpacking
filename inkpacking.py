@@ -51,6 +51,19 @@ def format_path(path):
 CUT_STYLE = str(inkex.Style({'stroke': '#000000', 'fill': 'none'}))
 FOLD_STYLE = str(inkex.Style({'stroke': '#0066ff', 'fill': 'none', 'stroke-dasharray': '2,1.5'}))
 
+# FEFCO code -> (topscheme, botscheme, tfal, bfal) presets. 'custom' (the
+# default) leaves the Body/Top&Bottom pages' own controls in charge.
+# 0215/0216 are exact matches for schemes this generator already had;
+# 0414/0427 are the best-effort topological interpretations built in
+# draw_tuck_lid_end/draw_tuck_slit_edge/draw_autolock_bottom -- see the
+# comment there and the README before treating them as exact.
+FEFCO_PRESETS = {
+    'fefco0215': ('notp', 'rwlf', True, True),
+    'fefco0216': ('rwlf', 'rwlf', True, True),
+    'fefco0414': ('notp', 'auto', True, True),
+    'fefco0427': ('tuck', 'rwlf', True, True),
+}
+
 
 class BoxBuilder:
     """Draws one InkPACKING box net into an SVG group. Holds the geometry
@@ -261,6 +274,92 @@ class BoxBuilder:
         ]
         self.add(suffix + '-fold', fold, cut=False)
 
+    # ------------------------------------------------------------------
+    # FEFCO-inspired ends
+    #
+    # These two are best-effort *topological* interpretations of FEFCO
+    # 0427 (tuck-tongue lid) and 0414 (friction-tuck bottom), built from
+    # the published technical drawings, which give panel proportions as
+    # bare H/W/L/half-W labels with no angles or offsets -- there is no
+    # spec to trace exactly. Fold/tuck a paper test copy before cutting
+    # real material, the same as with any new die design.
+    # ------------------------------------------------------------------
+
+    def draw_tuck_lid_end(self, suffix, ybase, sign, fal):
+        """FEFCO 0427-style lid: a flap the depth of the box (folds down
+        over the opening) ending in a pointed tongue that tucks into two
+        slits cut in the opposite panel (see draw_tuck_slit_edge)."""
+        boxW, boxD = self.boxW, self.boxD
+        desloc = 0 if fal else boxW + boxD
+        tongue_len = boxD * 0.35
+        tip_w = boxW * 0.4
+        side_in = (boxW - tip_w) / 2
+
+        cut = [
+            ['M', [desloc, ybase]],
+            ['l', [0, boxD * sign]],
+            ['l', [side_in, tongue_len * sign]],
+            ['l', [tip_w, 0]],
+            ['l', [side_in, tongue_len * -1 * sign]],
+            ['l', [0, boxD * -1 * sign]],
+        ]
+        self.add(suffix, cut, cut=True)
+
+        fold = [['M', [desloc, ybase + self.thck * sign]], ['l', [boxW, 0]]]
+        self.add(suffix + '-fold', fold, cut=False)
+        return tip_w, side_in
+
+    def draw_tuck_slit_edge(self, suffix, ybase, inicut, tip_w, side_in, sign):
+        """The plain edge opposite a tuck lid (see draw_tuck_lid_end), with
+        two short slits cut in for the lid's tongue to tuck through."""
+        boxW, thck = self.boxW, self.thck
+        slit_depth = thck * 4
+        x1 = inicut + side_in
+        x2 = inicut + side_in + tip_w
+        path = [
+            ['M', [inicut, ybase]],
+            ['l', [boxW, 0]],
+            ['M', [x1, ybase]],
+            ['l', [0, slit_depth * sign]],
+            ['M', [x2, ybase]],
+            ['l', [0, slit_depth * sign]],
+        ]
+        self.add(suffix, path, cut=True)
+
+    def draw_autolock_bottom(self, suffix, ybase, sign, fal):
+        """FEFCO 0414-style bottom: a two-segment flap on one panel (first
+        segment folds up to the box depth, second segment -- half the box
+        width, per the drawing's '1/2 W' label -- folds again and tucks
+        under by friction; no separate lock tab). The other three panel
+        edges are plain (drawn by draw_open_edge, called separately)."""
+        boxW, boxD = self.boxW, self.boxD
+        thck = self.thck
+        seg1 = boxD
+        seg2 = boxW / 2
+        desloc = 0 if fal else boxW + boxD
+
+        cut = [
+            ['M', [desloc, ybase]],
+            ['l', [0, seg1 * sign]],
+            ['M', [desloc + boxW, ybase]],
+            ['l', [0, seg1 * sign]],
+            ['M', [desloc, ybase + seg1 * sign]],
+            ['l', [0, seg2 * sign]],
+            ['M', [desloc + boxW, ybase + seg1 * sign]],
+            ['l', [0, seg2 * sign]],
+            ['M', [desloc, ybase + (seg1 + seg2) * sign]],
+            ['l', [boxW, 0]],
+        ]
+        self.add(suffix, cut, cut=True)
+
+        fold = [
+            ['M', [desloc, ybase + thck * sign]],
+            ['l', [boxW, 0]],
+            ['M', [desloc, ybase + seg1 * sign]],
+            ['l', [boxW, 0]],
+        ]
+        self.add(suffix + '-fold', fold, cut=False)
+
     def draw_dust_flaps(self, suffix, ybase, sign, scheme, fal, gp):
         """The small corner dust flaps that fold up/down from the depth (D)
         panels at the top and bottom of the box, regardless of end scheme
@@ -346,6 +445,7 @@ class BoxBuilder:
 class InkPacking(inkex.EffectExtension):
 
     def add_arguments(self, pars):
+        pars.add_argument("--fefcostyle", type=str, dest="fefcostyle", default="custom")
         pars.add_argument("--width", type=float, dest="width", default=10.0)
         pars.add_argument("--height", type=float, dest="height", default=15.0)
         pars.add_argument("--depth", type=float, dest="depth", default=3.0)
@@ -461,6 +561,9 @@ class InkPacking(inkex.EffectExtension):
         bfal = opt.bfal
         hotmeltp = opt.hotmeltprop
 
+        if opt.fefcostyle in FEFCO_PRESETS:
+            tpsc, btsc, tfal, bfal = FEFCO_PRESETS[opt.fefcostyle]
+
         self.validate(boxW, boxD, boxH, boxL, thck, lockrr, fingergrepr,
                        fingergrepa, fingergrepb, opt.clueflapangle)
 
@@ -489,6 +592,13 @@ class InkPacking(inkex.EffectExtension):
             b.draw_cut_edge('topcut', 0, -1, inicut, fingergrepa, fingergrepr)
         elif tpsc == "fwnf":
             b.draw_hotmelt_end('topdraw', 0, -1, tfal, hotmeltp)
+        elif tpsc == "tuck":
+            inicut = (boxW + boxD) if tfal else 0
+            tip_w, side_in = b.draw_tuck_lid_end('tophead', 0, -1, tfal)
+            b.draw_tuck_slit_edge('topcut', 0, inicut, tip_w, side_in, -1)
+        elif tpsc == "auto":
+            b.draw_open_edge('topdraw', 0, -1, False, False, fingergrepr)
+            b.draw_autolock_bottom('tophead', 0, -1, tfal)
 
         # --- bottom ---
         if btsc == "nobt":
@@ -499,11 +609,18 @@ class InkPacking(inkex.EffectExtension):
             b.draw_cut_edge('botcut', boxH, 1, inicut, fingergrepa, fingergrepr)
         elif btsc == "fwnf":
             b.draw_hotmelt_end('botdraw', boxH, 1, bfal, hotmeltp)
+        elif btsc == "tuck":
+            inicut = (boxW + boxD) if bfal else 0
+            tip_w, side_in = b.draw_tuck_lid_end('bothead', boxH, 1, bfal)
+            b.draw_tuck_slit_edge('botcut', boxH, inicut, tip_w, side_in, 1)
+        elif btsc == "auto":
+            b.draw_open_edge('botdraw', boxH, 1, False, False, fingergrepr)
+            b.draw_autolock_bottom('bothead', boxH, 1, bfal)
 
-        # --- dust flaps ---
-        if tpsc != "notp":
+        # --- dust flaps (only for the schemes that use them) ---
+        if tpsc in ("rwlf", "fwlf", "fwnf"):
             b.draw_dust_flaps('topglueflap', 0, -1, tpsc, tfal, top_gp)
-        if btsc != "nobt":
+        if btsc in ("rwlf", "fwlf", "fwnf"):
             b.draw_dust_flaps('botglueflap', boxH, 1, btsc, bfal, bot_gp)
 
 
