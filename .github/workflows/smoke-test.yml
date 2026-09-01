@@ -1,0 +1,25 @@
+name: Smoke test
+
+# Runs the extension the same way Inkscape does (pip-installed `inkex`,
+# current Python 3) against every top/bottom-scheme combination, so a
+# breakage like "works in the repo but not in any actually-installed
+# Inkscape" gets caught on every push/PR instead of being discovered by a
+# user years later.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install inkex
+      - run: python tests/run_variants.py

@@ -21,6 +21,14 @@ Copy the files inkpacking.py and inkpacking.inx into the directory indicated in 
 * Enter values for the available options
 * You can use the preview functionality (checkbox "Live Preview" at the bottom) to see how your changes affect the appearance of the folding box
 
+The generated lines come in two styles, so the output can be sent straight to a laser cutter / plotter workflow that tells them apart: solid black lines are cuts, dashed blue lines are folds (creases). Both are also tagged with a `class` attribute (`inkpacking-cut` / `inkpacking-fold`) for tools that filter by class rather than by color.
+
+## Development
+
+`inkpacking.py` draws each panel/flap through a small set of shared helper methods on `BoxBuilder` (top and bottom ends are the same code mirrored by a sign, rather than duplicated), instead of one function per end/scheme combination.
+
+`tests/run_variants.py` runs the extension against every top/bottom scheme, mirrored-flap and finger-slot combination and checks each produces valid SVG -- run it locally with `pip install inkex && python tests/run_variants.py`. It also runs in CI on every push/PR (`.github/workflows/smoke-test.yml`), which is the kind of check that would have caught this extension silently breaking under Inkscape 1.x in the first place.
+
 ## Screenshots:
 
 ![dialog_1](https://cloud.githubusercontent.com/assets/3240233/11562363/dce5b7be-99cd-11e5-92a9-1d16b1fce41f.png)
